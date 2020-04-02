@@ -1,0 +1,24 @@
+@view('header', [ 'title' => 'Offline' ])
+
+<div class="app">
+    <div class="header">
+        <p class="header-name"><a href="/">{{ APP_NAME }}</a></p>
+        <p class="header-version">v{{ APP_VERSION }}</p>
+    </div>
+    <div class="columns">
+        <div class="column-left">
+            <div class="logo"></div>
+        </div>
+        <div class="column-right">
+            <div class="box">
+                <h1>Offline</h1>
+                <p>You are offline, to use this site you must connect to the internet again.</p>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <p>Made by <a href="https://bastiaan.ml/" target="_blank" rel="noreferrer">Bastiaan van der Plaat</a></p>
+    </div>
+</div>
+
+@view('footer')

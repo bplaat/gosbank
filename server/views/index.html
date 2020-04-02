@@ -1,0 +1,24 @@
+@view('header', [ 'title' => 'Home' ])
+
+<div class="app">
+    <div class="header">
+        <p class="header-name"><a href="/">{{ APP_NAME }}</a></p>
+        <p class="header-version">v{{ APP_VERSION }}</p>
+    </div>
+    <div class="columns">
+        <div class="column-left">
+            <div class="logo"></div>
+        </div>
+        <div class="column-right">
+            <div class="box">
+                <h1>{{ APP_NAME }}</h1>
+                <p>The future of central communist banking</p>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <p>Made by <a href="https://bastiaan.ml/" target="_blank" rel="noreferrer">Bastiaan van der Plaat</a></p>
+    </div>
+</div>
+
+@view('footer')
