@@ -47,6 +47,48 @@ wss.on('connection', function (ws) {
                 }
             }
         }
+
+        if (bankCode !== undefined) {
+            if (type == 'balance') {
+                if (data.header.receiveCountry == 'SU') {
+                    if (connectedBanks[data.header.receiveBank] !== undefined) {
+                        connectedBanks[data.header.receiveBank].send(JSON.stringify(message));
+                    }
+                    else {
+                        send('withdraw', {
+                            success: false,
+                            message: 'The Sovjet Bank you tried to message is not connected to Gosbank!'
+                        });
+                    }
+                }
+                else {
+                    send('withdraw', {
+                        success: false,
+                        message: 'Gosbank only supports Sovjet Banks!'
+                    });
+                }
+            }
+
+            if (type == 'withdraw') {
+                if (data.header.receiveCountry == 'SU') {
+                    if (connectedBanks[data.header.receiveBank] !== undefined) {
+                        connectedBanks[data.header.receiveBank].send(JSON.stringify(message));
+                    }
+                    else {
+                        send('withdraw', {
+                            success: false,
+                            message: 'The Sovjet Bank you tried to message is not connected to Gosbank!'
+                        });
+                    }
+                }
+                else {
+                    send('withdraw', {
+                        success: false,
+                        message: 'Gosbank only supports Sovjet Banks!'
+                    });
+                }
+            }
+        }
     });
 
     ws.on('close', function () {

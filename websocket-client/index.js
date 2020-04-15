@@ -12,18 +12,67 @@ const RECONNECT_TIMEOUT = 10 * 1000;
 // ########### CLIENT CODE ###########
 const WebSocket = require('ws');
 
-function connect() {
+function connectToGosbank() {
     const ws = new WebSocket('ws://localhost:8080');
 
-    function send(type, data) {
+    const pendingCallbacks = [];
+
+    function sendMessage(type, data, callback) {
+        pendingCallbacks.push({ type: type, callback: callback });
         ws.send(JSON.stringify({ type: type, data: data }));
     }
 
-    ws.on('open', function () {
-        send('register', {
+    function requestRegister(callback) {
+        sendMessage('register', {
             header: {
                 country: COUNTRY_CODE,
                 bank: BANK_CODE
+            }
+        }, callback);
+    }
+
+    function requestBalance(country, bank, account, pin, callback) {
+        sendMessage('balance', {
+            header: {
+                originCountry: COUNTRY_CODE,
+                originBank: BANK_CODE,
+                receiveCountry: country,
+                receiveBank: bank
+            },
+            body: {
+                account: account,
+                pin: pin
+            }
+        }, callback);
+    }
+
+    function requestWithdraw(country, bank, account, pin, amount, callback) {
+        sendMessage('withdraw', {
+            header: {
+                originCountry: COUNTRY_CODE,
+                originBank: BANK_CODE,
+                receiveCountry: country,
+                receiveBank: bank
+            },
+            body: {
+                account: account,
+                pin: pin,
+                amount: amount
+            }
+        }, callback);
+    }
+
+    ws.on('open', function () {
+        requestRegister(function (response) {
+            if (response.success) {
+                console.log('Connected with Gosbank!');
+
+                requestBalance('SU', 'DASB', '00000001', '1234', function (response) {
+                    console.log('Balance: ' + response.data.balance);
+                });
+            }
+            else {
+                console.log('Error with connecting to Gosbank, reason: ' + data.message);
             }
         });
     });
@@ -32,21 +81,26 @@ function connect() {
         message = JSON.parse(message);
         const type = message.type;
         const data = message.data;
-        console.log(type, data);
 
-        if (type == 'register') {
-            if (data.success) {
-                console.log('Connected with Gosbank!');
+        for (var i = 0; i < pendingCallbacks.length; i++) {
+            if (pendingCallbacks[i].type == type) {
+                pendingCallbacks[i].callback(data);
+                pendingCallbacks.splice(i--);
             }
-            else {
-                console.log('Error with connecting to Gosbank, reason: ' + data.message);
-            }
+        }
+
+        if (type == 'balance') {
+            console.log('Balance request:', data);
+        }
+
+        if (type == 'withdraw') {
+            console.log('Withdraw request:', data);
         }
     });
 
     ws.on('close', function () {
         console.log('Disconnected, try to reconnect in ' + (RECONNECT_TIMEOUT / 1000).toFixed(0) + ' seconds!');
-        setTimeout(connect, RECONNECT_TIMEOUT);
+        setTimeout(connectToGosbank, RECONNECT_TIMEOUT);
     });
 
     ws.on('error', function (error) {
@@ -54,4 +108,4 @@ function connect() {
     });
 }
 
-connect();
+connectToGosbank();
