@@ -22,8 +22,14 @@ wss.on('connection', function (ws) {
         const data = message.data;
 
         if (type === 'register') {
-            if (data.header === undefined || data.header.country === undefined || data.header.bank === undefined) {
+            if (data.header === undefined || data.header.originCountry === undefined || data.header.originBank === undefined) {
                 responseMessage(id, 'register', {
+                    header: {
+                        originCountry: 'SU',
+                        originBank: 'GOSB',
+                        receiveCountry: data.header.originCountry,
+                        receiveBank: data.header.originBank
+                    },
                     body: {
                         success: false,
                         message: 'You have send a broken message!'
@@ -32,7 +38,7 @@ wss.on('connection', function (ws) {
                 ws.close();
             }
             else {
-                bankCode = data.header.bank;
+                bankCode = data.header.originBank;
 
                 if (connectedBanks[bankCode] === undefined) {
                     connectedBanks[bankCode] = ws;
@@ -44,6 +50,12 @@ wss.on('connection', function (ws) {
                     });
 
                     responseMessage(id, 'register', {
+                        header: {
+                            originCountry: 'SU',
+                            originBank: 'GOSB',
+                            receiveCountry: data.header.originCountry,
+                            receiveBank: data.header.originBank
+                        },
                         body: {
                             success: true,
                             message: 'You have successful registerd by Gosbank!'
@@ -53,6 +65,12 @@ wss.on('connection', function (ws) {
 
                 else {
                     responseMessage(id, 'register', {
+                        header: {
+                            originCountry: 'SU',
+                            originBank: 'GOSB',
+                            receiveCountry: data.header.originCountry,
+                            receiveBank: data.header.originBank
+                        },
                         body: {
                             success: false,
                             message: 'There is already a bank with that bank code connected!'
@@ -77,7 +95,13 @@ wss.on('connection', function (ws) {
                     }
                     else {
                         responseMessage(id, 'balance', {
-                                body: {
+                            header: {
+                                originCountry: 'SU',
+                                originBank: 'GOSB',
+                                receiveCountry: data.header.originCountry,
+                                receiveBank: data.header.originBank
+                            },
+                            body: {
                                 success: false,
                                 message: 'The Sovjet Bank you tried to message is not connected to Gosbank!'
                             }
@@ -86,6 +110,12 @@ wss.on('connection', function (ws) {
                 }
                 else {
                     responseMessage(id, 'balance', {
+                        header: {
+                            originCountry: 'SU',
+                            originBank: 'GOSB',
+                            receiveCountry: data.header.originCountry,
+                            receiveBank: data.header.originBank
+                        },
                         body: {
                             success: false,
                             message: 'Gosbank only supports Sovjet Banks for now!'
@@ -101,6 +131,58 @@ wss.on('connection', function (ws) {
                 ) {
                     connectedBanks[data.header.receiveBank].send(json_message);
                     console.log(data.header.originBank + ' -> ' + data.header.receiveBank + ': balance_response');
+                }
+            }
+
+            if (type === 'payment') {
+                if (data.header.receiveCountry === 'SU') {
+                    if (connectedBanks[data.header.receiveBank] !== undefined) {
+                        if (
+                            connectedBanks[data.header.receiveBank] !== undefined &&
+                            connectedBanks[data.header.receiveBank].readyState === WebSocket.OPEN
+                        ) {
+                            connectedBanks[data.header.receiveBank].send(json_message);
+                            console.log(data.header.originBank + ' -> ' + data.header.receiveBank + ': payment');
+                        }
+                    }
+                    else {
+                        responseMessage(id, 'payment', {
+                            header: {
+                                originCountry: 'SU',
+                                originBank: 'GOSB',
+                                receiveCountry: data.header.originCountry,
+                                receiveBank: data.header.originBank
+                            },
+                            body: {
+                                success: false,
+                                message: 'The Sovjet Bank you tried to message is not connected to Gosbank!'
+                            }
+                        });
+                    }
+                }
+                else {
+                    responseMessage(id, 'payment', {
+                        header: {
+                            originCountry: 'SU',
+                            originBank: 'GOSB',
+                            receiveCountry: data.header.originCountry,
+                            receiveBank: data.header.originBank
+                        },
+                        body: {
+                            success: false,
+                            message: 'Gosbank only supports Sovjet Banks for now!'
+                        }
+                    });
+                }
+            }
+
+            if (type === 'payment_response') {
+                if (
+                    connectedBanks[data.header.receiveBank] !== undefined &&
+                    connectedBanks[data.header.receiveBank].readyState === WebSocket.OPEN
+                ) {
+                    connectedBanks[data.header.receiveBank].send(json_message);
+                    console.log(data.header.originBank + ' -> ' + data.header.receiveBank + ': payment_response');
                 }
             }
         }

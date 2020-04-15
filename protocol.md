@@ -23,8 +23,10 @@ Send to Gosbank when connection is opened
 ```json
 register {
     "header": {
-        "country": "SU",
-        "bank": "BANQ"
+        "originCountry": "SU",
+        "originBank": "BANQ",
+        "receiveCountry": "SU",
+        "receiveBank": "GOSB"
     }
 }
 ```
@@ -33,6 +35,12 @@ register {
 When broken message
 ```json
 register_response {
+    "header": {
+        "originCountry": "SU",
+        "originBank": "GOSB",
+        "receiveCountry": "SU",
+        "receiveBank": "BANQ"
+    },
     "body": {
         "success": false,
         "message": "You have send a broken message!"
@@ -43,6 +51,12 @@ register_response {
 When successful
 ```json
 register_response {
+    "header": {
+        "originCountry": "SU",
+        "originBank": "GOSB",
+        "receiveCountry": "SU",
+        "receiveBank": "BANQ"
+    },
     "body": {
         "success": true,
         "message": "You have successful registerd by Gosbank!"
@@ -53,6 +67,12 @@ register_response {
 When already connected
 ```json
 register_response {
+    "header": {
+        "originCountry": "SU",
+        "originBank": "GOSB",
+        "receiveCountry": "SU",
+        "receiveBank": "BANQ"
+    },
     "body": {
         "success": false,
         "message": "There is already a bank with that bank code connected!"
@@ -73,7 +93,7 @@ withdraw {
         "receiveBank": "DASB"
     },
     "body": {
-        "account": "00000003",
+        "account": "SU-BANQ-00000003",
         "pin": "1234"
     }
 }
@@ -100,6 +120,12 @@ balance_response {
 When broken message
 ```json
 balance_response {
+    "header": {
+        "originCountry": "SU",
+        "originBank": "GOSB",
+        "receiveCountry": "SU",
+        "receiveBank": "BANQ"
+    },
     "body": {
         "success": false,
         "message": "You have send a broken message!"
@@ -110,6 +136,12 @@ balance_response {
 When country is not SU
 ```json
 balance_response {
+    "header": {
+        "originCountry": "SU",
+        "originBank": "GOSB",
+        "receiveCountry": "SU",
+        "receiveBank": "BANQ"
+    },
     "body": {
         "success": false,
         "message": "Gosbank only supports Sovjet Banks for now!"
@@ -120,6 +152,98 @@ balance_response {
 When country is SU and no bank with that name
 ```json
 balance_response {
+    "header": {
+        "originCountry": "SU",
+        "originBank": "GOSB",
+        "receiveCountry": "SU",
+        "receiveBank": "BANQ"
+    },
+    "body": {
+        "success": false,
+        "message": "There is already a bank with that bank code connected!"
+    }
+}
+```
+
+## Pay
+
+### Request
+**BANQ** sends to the Gosbank, Gosbank sends to **DASB**
+```json
+payment {
+    "header": {
+        "originCountry": "SU",
+        "originBank": "BANQ",
+        "receiveCountry": "SU",
+        "receiveBank": "DASB"
+    },
+    "body": {
+        "from_account": "SU-DASB-00000010",
+        "to_account": "SU-BANQ-00000001",
+        "pin": "1234",
+        "amount": 4.56
+    }
+}
+```
+
+### Response
+**DASB** sends to Gosbank, Gosbank sends to **BANQ**
+```json
+payment_response {
+    "header": {
+        "originCountry": "SU",
+        "originBank": "DASB",
+        "receiveCountry": "SU",
+        "receiveBank": "BANQ"
+    },
+    "body": {
+        "success": true,
+        "message": "Succesful"
+    }
+}
+```
+
+When broken message
+```json
+payment_response {
+    "header": {
+        "originCountry": "SU",
+        "originBank": "GOSB",
+        "receiveCountry": "SU",
+        "receiveBank": "BANQ"
+    },
+    "body": {
+        "success": false,
+        "message": "You have send a broken message!"
+    }
+}
+```
+
+When country is not SU
+```json
+payment_response {
+    "header": {
+        "originCountry": "SU",
+        "originBank": "GOSB",
+        "receiveCountry": "SU",
+        "receiveBank": "BANQ"
+    },
+    "body": {
+        "success": false,
+        "message": "Gosbank only supports Sovjet Banks for now!"
+    }
+}
+```
+
+When country is SU and no bank with that name
+```json
+payment_response {
+    "header": {
+        "originCountry": "SU",
+        "originBank": "GOSB",
+        "receiveCountry": "SU",
+        "receiveBank": "BANQ"
+    },
     "body": {
         "success": false,
         "message": "There is already a bank with that bank code connected!"
