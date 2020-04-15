@@ -15,8 +15,8 @@ wss.on('connection', function (ws) {
         }
     }
 
-    ws.on('message', function (message) {
-        message = JSON.parse(message);
+    ws.on('message', function (json_message) {
+        const message = JSON.parse(json_message);
         const id = message.id;
         const type = message.type;
         const data = message.data;
@@ -36,18 +36,18 @@ wss.on('connection', function (ws) {
 
                 if (connectedBanks[bankCode] === undefined) {
                     connectedBanks[bankCode] = ws;
-                    responseMessage(id, 'register', {
-                        body: {
-                            success: true,
-                            message: 'You have successful registerd by Gosbank!'
-                        }
-                    });
-
                     console.log(bankCode + ' registered');
 
                     ws.addEventListener('close', function () {
                         connectedBanks[bankCode] = undefined;
                         console.log(bankCode + ' disconnected');
+                    });
+
+                    responseMessage(id, 'register', {
+                        body: {
+                            success: true,
+                            message: 'You have successful registerd by Gosbank!'
+                        }
                     });
                 }
 
@@ -67,8 +67,11 @@ wss.on('connection', function (ws) {
             if (type === 'balance') {
                 if (data.header.receiveCountry === 'SU') {
                     if (connectedBanks[data.header.receiveBank] !== undefined) {
-                        if (connectedBanks[data.header.receiveBank].readyState === WebSocket.OPEN) {
-                            connectedBanks[data.header.receiveBank].send(JSON.stringify(message));
+                        if (
+                            connectedBanks[data.header.receiveBank] !== undefined &&
+                            connectedBanks[data.header.receiveBank].readyState === WebSocket.OPEN
+                        ) {
+                            connectedBanks[data.header.receiveBank].send(json_message);
                             console.log(data.header.originBank + ' -> ' + data.header.receiveBank + ': balance');
                         }
                     }
@@ -92,8 +95,11 @@ wss.on('connection', function (ws) {
             }
 
             if (type === 'balance_response') {
-                if (connectedBanks[data.header.receiveBank].readyState === WebSocket.OPEN) {
-                    connectedBanks[data.header.receiveBank].send(JSON.stringify(message));
+                if (
+                    connectedBanks[data.header.receiveBank] !== undefined &&
+                    connectedBanks[data.header.receiveBank].readyState === WebSocket.OPEN
+                ) {
+                    connectedBanks[data.header.receiveBank].send(json_message);
                     console.log(data.header.originBank + ' -> ' + data.header.receiveBank + ': balance_response');
                 }
             }

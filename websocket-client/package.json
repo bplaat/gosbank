@@ -1,5 +1,5 @@
 {
-  "name": "gosbank",
+  "name": "gosbank-client",
   "version": "0.0.1",
   "description": "The land node of the Soviet Union (Class TI1E)",
   "main": "index.js",

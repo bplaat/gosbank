@@ -4,7 +4,7 @@
 const COUNTRY_CODE = 'SU';
 
 // Your bank code
-const BANK_CODE = 'DASB';
+const BANK_CODE = process.argv[2] || 'BANQ';
 
 // When disconnect try to reconnect timeout (in ms)
 const RECONNECT_TIMEOUT = 2 * 1000;
@@ -27,15 +27,6 @@ function connectToGosbank() {
         ws.send(JSON.stringify({ id: id, type: type + '_response', data: data }));
     }
 
-    function requestRegister(callback) {
-        requestMessage('register', {
-            header: {
-                country: COUNTRY_CODE,
-                bank: BANK_CODE
-            }
-        }, callback);
-    }
-
     function requestBalance(country, bank, account, pin, callback) {
         requestMessage('balance', {
             header: {
@@ -52,14 +43,19 @@ function connectToGosbank() {
     }
 
     ws.on('open', function () {
-        requestRegister(function (data) {
+        requestMessage('register', {
+            header: {
+                country: COUNTRY_CODE,
+                bank: BANK_CODE
+            }
+        }, function (data) {
             if (data.body.success) {
-                console.log('Connected with Gosbank!');
+                console.log('Connected with Gosbank with bank code: ' + BANK_CODE);
 
                 var i = 0;
                 setInterval(function () {
                     var q = i++;
-                    requestBalance('SU', 'BANQ', q, '1234', function (data) {
+                    requestBalance('SU', ['BANQ', 'DASB', 'GETB'][Math.floor(Math.random() * 3)], q, '1234', function (data) {
                         if (data.body.success) {
                             console.log('Balance account ' + q + ': ' + data.body.balance);
                         }
@@ -67,7 +63,7 @@ function connectToGosbank() {
                             console.log('Balance error: ' + data.body.message);
                         }
                     });
-                }, 250);
+                }, 500);
             }
             else {
                 console.log('Error with connecting to Gosbank, reason: ' + data.body.message);
@@ -75,8 +71,8 @@ function connectToGosbank() {
         });
     });
 
-    ws.on('message', function (message) {
-        message = JSON.parse(message);
+    ws.on('message', function (json_message) {
+        const message = JSON.parse(json_message);
         const id = message.id;
         const type = message.type;
         const data = message.data;
@@ -105,7 +101,7 @@ function connectToGosbank() {
                         balance: parseFloat((Math.random() * 10000).toFixed(2))
                     }
                 });
-            }, 1000);
+            }, Math.random() * 2000 + 500);
         }
     });
 
