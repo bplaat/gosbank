@@ -9,21 +9,25 @@ const connectedBanks = {};
 wss.on('connection', function (ws) {
     let bankCode;
 
-    function send(type, data) {
-        ws.send(JSON.stringify({ type: type, data: data }));
+    function responseMessage(id, type, data) {
+        if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ id: id, type: type + '_response', data: data }));
+        }
     }
 
     ws.on('message', function (message) {
         message = JSON.parse(message);
+        const id = message.id;
         const type = message.type;
         const data = message.data;
-        console.log(type, data);
 
-        if (type == 'register') {
-            if (data.header.country === undefined || data.header.bank === undefined) {
-                send('register', {
-                    success: false,
-                    message: 'You don\t have given a country and/or bank code!'
+        if (type === 'register') {
+            if (data.header === undefined || data.header.country === undefined || data.header.bank === undefined) {
+                responseMessage(id, 'register', {
+                    body: {
+                        success: false,
+                        message: 'You have send a broken message!'
+                    }
                 });
                 ws.close();
             }
@@ -32,16 +36,27 @@ wss.on('connection', function (ws) {
 
                 if (connectedBanks[bankCode] === undefined) {
                     connectedBanks[bankCode] = ws;
-                    send('register', {
-                        success: true,
-                        message: 'You have successful registerd by Gosbank!'
+                    responseMessage(id, 'register', {
+                        body: {
+                            success: true,
+                            message: 'You have successful registerd by Gosbank!'
+                        }
+                    });
+
+                    console.log(bankCode + ' registered');
+
+                    ws.addEventListener('close', function () {
+                        connectedBanks[bankCode] = undefined;
+                        console.log(bankCode + ' disconnected');
                     });
                 }
 
                 else {
-                    send('register', {
-                        success: false,
-                        message: 'There is already a bank with that bank code connected!'
+                    responseMessage(id, 'register', {
+                        body: {
+                            success: false,
+                            message: 'There is already a bank with that bank code connected!'
+                        }
                     });
                     ws.close();
                 }
@@ -49,52 +64,39 @@ wss.on('connection', function (ws) {
         }
 
         if (bankCode !== undefined) {
-            if (type == 'balance') {
-                if (data.header.receiveCountry == 'SU') {
+            if (type === 'balance') {
+                if (data.header.receiveCountry === 'SU') {
                     if (connectedBanks[data.header.receiveBank] !== undefined) {
-                        connectedBanks[data.header.receiveBank].send(JSON.stringify(message));
+                        if (connectedBanks[data.header.receiveBank].readyState === WebSocket.OPEN) {
+                            connectedBanks[data.header.receiveBank].send(JSON.stringify(message));
+                            console.log(data.header.originBank + ' -> ' + data.header.receiveBank + ': balance');
+                        }
                     }
                     else {
-                        send('withdraw', {
-                            success: false,
-                            message: 'The Sovjet Bank you tried to message is not connected to Gosbank!'
+                        responseMessage(id, 'balance', {
+                                body: {
+                                success: false,
+                                message: 'The Sovjet Bank you tried to message is not connected to Gosbank!'
+                            }
                         });
                     }
                 }
                 else {
-                    send('withdraw', {
-                        success: false,
-                        message: 'Gosbank only supports Sovjet Banks!'
-                    });
-                }
-            }
-
-            if (type == 'withdraw') {
-                if (data.header.receiveCountry == 'SU') {
-                    if (connectedBanks[data.header.receiveBank] !== undefined) {
-                        connectedBanks[data.header.receiveBank].send(JSON.stringify(message));
-                    }
-                    else {
-                        send('withdraw', {
+                    responseMessage(id, 'balance', {
+                        body: {
                             success: false,
-                            message: 'The Sovjet Bank you tried to message is not connected to Gosbank!'
-                        });
-                    }
-                }
-                else {
-                    send('withdraw', {
-                        success: false,
-                        message: 'Gosbank only supports Sovjet Banks!'
+                            message: 'Gosbank only supports Sovjet Banks for now!'
+                        }
                     });
                 }
             }
-        }
-    });
 
-    ws.on('close', function () {
-        if (bankCode !== undefined) {
-            console.log(bankCode + ' disconnected');
-            connectedBanks[bankCode] = undefined;
+            if (type === 'balance_response') {
+                if (connectedBanks[data.header.receiveBank].readyState === WebSocket.OPEN) {
+                    connectedBanks[data.header.receiveBank].send(JSON.stringify(message));
+                    console.log(data.header.originBank + ' -> ' + data.header.receiveBank + ': balance_response');
+                }
+            }
         }
     });
 });
