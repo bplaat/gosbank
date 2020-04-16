@@ -166,6 +166,7 @@ balance_response {
 ```
 
 ## Pay
+The bank can send a payment request when a bank is or of the from account or of the to account.
 
 ### Request
 **BANQ** sends to the Gosbank, Gosbank sends to **DASB**

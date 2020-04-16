@@ -58,60 +58,39 @@ function connectToGosbank() {
         const form_account_parts = parseAccountParts(from_account);
         const to_account_parts = parseAccountParts(to_account);
 
-        let fromSuccess = false;
-        let toSuccess = false;
-
-        function paymentCallback(data) {
-            if (
-                data.header.originCountry == form_account_parts.country &&
-                data.header.originBank == form_account_parts.bank &&
-                data.body.success
-            ) {
-                fromSuccess = true;
-            }
-
-            if (
-                data.header.originCountry == to_account_parts.country &&
-                data.header.originBank == to_account_parts.bank &&
-                data.body.success
-            ) {
-                toSuccess = true;
-            }
-
-            if (fromSuccess && toSuccess) {
-                callback(data);
-            }
+        if (form_account_parts.bank !== BANK_CODE) {
+            requestMessage('payment', {
+                header: {
+                    originCountry: COUNTRY_CODE,
+                    originBank: BANK_CODE,
+                    receiveCountry: form_account_parts.country,
+                    receiveBank: form_account_parts.bank
+                },
+                body: {
+                    from_account: from_account,
+                    to_account: to_account,
+                    pin: pin,
+                    amount: amount
+                }
+            }, callback);
         }
 
-        requestMessage('payment', {
-            header: {
-                originCountry: COUNTRY_CODE,
-                originBank: BANK_CODE,
-                receiveCountry: form_account_parts.country,
-                receiveBank: form_account_parts.bank
-            },
-            body: {
-                from_account: from_account,
-                to_account: to_account,
-                pin: pin,
-                amount: amount
-            }
-        }, paymentCallback);
-
-        requestMessage('payment', {
-            header: {
-                originCountry: COUNTRY_CODE,
-                originBank: BANK_CODE,
-                receiveCountry: to_account_parts.country,
-                receiveBank: to_account_parts.bank
-            },
-            body: {
-                from_account: from_account,
-                to_account: to_account,
-                pin: pin,
-                amount: amount
-            }
-        }, paymentCallback);
+        if (to_account_parts.bank !== BANK_CODE) {
+            requestMessage('payment', {
+                header: {
+                    originCountry: COUNTRY_CODE,
+                    originBank: BANK_CODE,
+                    receiveCountry: to_account_parts.country,
+                    receiveBank: to_account_parts.bank
+                },
+                body: {
+                    from_account: from_account,
+                    to_account: to_account,
+                    pin: pin,
+                    amount: amount
+                }
+            }, callback);
+        }
     }
 
     ws.on('open', function () {
@@ -145,7 +124,7 @@ function connectToGosbank() {
                             console.log('Payment accepted');
                         }
                         else {
-                            console.log('Payment failed');
+                            console.log('Payment error: ' + data.body.message);
                         }
                     });
                 }, 500);
