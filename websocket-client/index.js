@@ -21,7 +21,7 @@ function parseAccountParts(account) {
 }
 
 function connectToGosbank() {
-    const ws = new WebSocket('ws://localhost:8080');
+    const ws = new WebSocket('wss://ws.gosbank.ml/');
 
     const pendingCallbacks = [];
 

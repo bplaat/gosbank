@@ -3,6 +3,9 @@ The Gosbank WebSocket protocol
 
 This protocol uses some parts of the [NOOB](https://github.com/luukk/noob) protocol
 
+## Websocket server URL
+Gosbank is live at: `wss://ws.gosbank.ml/`
+
 ## Message format
 Every websocket message is send in JSON to and from Gosbank, in the following container, the id is the Date time in ms, and the id is the same for a response message:
 ```json
