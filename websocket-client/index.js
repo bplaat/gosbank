@@ -97,8 +97,11 @@ function connectToGosbank() {
         requestMessage('register', {
             header: {
                 originCountry: COUNTRY_CODE,
-                originBank: BANK_CODE
-            }
+                originBank: BANK_CODE,
+                receiveCountry: 'SU',
+                receiveBank: 'GOSB'
+            },
+            body: {}
         }, function (data) {
             if (data.body.success) {
                 console.log('Connected with Gosbank with bank code: ' + BANK_CODE);

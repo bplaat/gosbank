@@ -10,8 +10,29 @@ Every websocket message is send in JSON to and from Gosbank, in the following co
     "id": 1586944886599,
     "type": "register",
     "data": {
-        "header": {},
+        "header": {
+            "originCountry": "SU",
+            "originBank": "GOSB",
+            "receiveCountry": "SU",
+            "receiveBank": "BANQ"
+        },
         "body": {}
+    }
+}
+```
+
+When you send a broken message the response is always:
+```json
+*_response {
+    "header": {
+        "originCountry": "SU",
+        "originBank": "GOSB",
+        "receiveCountry": "SU",
+        "receiveBank": "BANQ"
+    },
+    "body": {
+        "success": false,
+        "message": "You have send a broken message!"
     }
 }
 ```
@@ -27,24 +48,8 @@ register {
         "originBank": "BANQ",
         "receiveCountry": "SU",
         "receiveBank": "GOSB"
-    }
-}
-```
-
-### Response
-When broken message
-```json
-register_response {
-    "header": {
-        "originCountry": "SU",
-        "originBank": "GOSB",
-        "receiveCountry": "SU",
-        "receiveBank": "BANQ"
     },
-    "body": {
-        "success": false,
-        "message": "You have send a broken message!"
-    }
+    "body": {}
 }
 ```
 
@@ -117,22 +122,6 @@ balance_response {
 }
 ```
 
-When broken message
-```json
-balance_response {
-    "header": {
-        "originCountry": "SU",
-        "originBank": "GOSB",
-        "receiveCountry": "SU",
-        "receiveBank": "BANQ"
-    },
-    "body": {
-        "success": false,
-        "message": "You have send a broken message!"
-    }
-}
-```
-
 When country is not SU
 ```json
 balance_response {
@@ -160,7 +149,7 @@ balance_response {
     },
     "body": {
         "success": false,
-        "message": "There is already a bank with that bank code connected!"
+        "message": "The Sovjet Bank you tried to message is not connected to Gosbank!"
     }
 }
 ```
@@ -204,22 +193,6 @@ payment_response {
 }
 ```
 
-When broken message
-```json
-payment_response {
-    "header": {
-        "originCountry": "SU",
-        "originBank": "GOSB",
-        "receiveCountry": "SU",
-        "receiveBank": "BANQ"
-    },
-    "body": {
-        "success": false,
-        "message": "You have send a broken message!"
-    }
-}
-```
-
 When country is not SU
 ```json
 payment_response {
@@ -247,7 +220,7 @@ payment_response {
     },
     "body": {
         "success": false,
-        "message": "There is already a bank with that bank code connected!"
+        "message": "The Sovjet Bank you tried to message is not connected to Gosbank!"
     }
 }
 ```
