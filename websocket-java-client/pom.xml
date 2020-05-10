@@ -3,8 +3,8 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>ml.gosbank.client</groupId>
-    <artifactId>gosbankClient</artifactId>
-    <version>0.1</version>
+    <artifactId>gosbank-client</artifactId>
+    <version>0.1.0</version>
     <packaging>jar</packaging>
 
     <properties>

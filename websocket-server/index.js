@@ -16,6 +16,8 @@ wss.on('connection', function (ws) {
     ws.on('message', function (message) {
         const { id, type, data } = JSON.parse(message);
 
+        console.log(message);
+
         if (
             id === undefined ||
             type === undefined ||
@@ -41,7 +43,7 @@ wss.on('connection', function (ws) {
             ws.close();
         }
 
-        if (type === 'register') {
+        else if (type === 'register') {
             if (connectedBanks[data.header.originBank] === undefined) {
                 bankCode = data.header.originBank;
                 connectedBanks[bankCode] = ws;
@@ -81,7 +83,7 @@ wss.on('connection', function (ws) {
             }
         }
 
-        if (bankCode !== undefined) {
+        else if (bankCode !== undefined) {
             if (data.header.receiveCountry === 'SU') {
                 if (
                     connectedBanks[data.header.receiveBank] !== undefined &&
