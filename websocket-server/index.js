@@ -16,7 +16,7 @@ wss.on('connection', function (ws) {
     ws.on('message', function (message) {
         const { id, type, data } = JSON.parse(message);
 
-        console.log(message);
+        // console.log(message);
 
         if (
             id === undefined ||
