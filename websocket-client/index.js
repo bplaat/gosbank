@@ -118,7 +118,7 @@ function connectToGosbank() {
                             console.log('Balance account ' + q + ': ' + data.body.balance);
                         }
                         else {
-                            console.log('Balance error: ' + data.body.message);
+                            console.log('Balance error: ' + data.body.code);
                         }
                     });
 
@@ -130,13 +130,13 @@ function connectToGosbank() {
                             console.log('Payment accepted');
                         }
                         else {
-                            console.log('Payment error: ' + data.body.message);
+                            console.log('Payment error: ' + data.body.code);
                         }
                     });
                 }, 500);
             }
             else {
-                console.log('Error with connecting to Gosbank, reason: ' + data.body.message);
+                console.log('Error with connecting to Gosbank, reason: ' + data.body.code);
             }
         });
     });
