@@ -7,11 +7,11 @@ import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONObject;
 
 public class Client extends WebSocketClient {
-    public interface OnResponseListener {
+    public static interface OnResponseListener {
         public abstract void onResponse(JSONObject data);
     }
 
-    public class CallbackItem {
+    public static class CallbackItem {
         public long id;
         public String type;
         public OnResponseListener onResponseListener;
@@ -34,7 +34,68 @@ public class Client extends WebSocketClient {
         message.put("id", id);
         message.put("type", type);
         message.put("data", data);
-        send(message.toString());
+        String jsonMessage = message.toString();
+        if (Config.DEBUG) System.out.println("[DEBUG] Sent: " + jsonMessage);
+        send(jsonMessage);
+    }
+
+    public void sendBalanceMessage(String account, String pin, OnResponseListener onResponseListener) {
+        Utils.AccountParts accountParts = Utils.parseAccountParts(account);
+
+        JSONObject balanceMessage = new JSONObject();
+
+        JSONObject balanceMessageHeader = new JSONObject();
+        balanceMessageHeader.put("originCountry", Config.COUNTRY_CODE);
+        balanceMessageHeader.put("originBank", Config.BANK_CODE);
+        balanceMessageHeader.put("receiveCountry", accountParts.country);
+        balanceMessageHeader.put("receiveBank", accountParts.bank);
+        balanceMessage.put("header", balanceMessageHeader);
+
+        JSONObject balanceMessageBody = new JSONObject();
+        balanceMessageBody.put("account", account);
+        balanceMessageBody.put("pin", pin);
+        balanceMessage.put("body", balanceMessageBody);
+
+        sendMessage("balance", balanceMessage, onResponseListener);
+    }
+
+    public void sendPaymentMessage(String fromAccount, String toAccount, String pin, float amount, OnResponseListener onResponseListener) {
+        Utils.AccountParts formAccountParts = Utils.parseAccountParts(fromAccount);
+        Utils.AccountParts toAccountParts = Utils.parseAccountParts(toAccount);
+
+        JSONObject paymentMessage = new JSONObject();
+
+        JSONObject paymentMessageHeader = new JSONObject();
+        paymentMessageHeader.put("originCountry", Config.COUNTRY_CODE);
+        paymentMessageHeader.put("originBank", Config.BANK_CODE);
+        if (!formAccountParts.bank.equals(Config.BANK_CODE)) {
+            paymentMessageHeader.put("receiveCountry", formAccountParts.country);
+            paymentMessageHeader.put("receiveBank", formAccountParts.bank);
+        }
+        if (!toAccountParts.bank.equals(Config.BANK_CODE)) {
+            paymentMessageHeader.put("receiveCountry", toAccountParts.country);
+            paymentMessageHeader.put("receiveBank", toAccountParts.bank);
+        }
+        paymentMessage.put("header", paymentMessageHeader);
+
+        JSONObject paymentMessageBody = new JSONObject();
+        paymentMessageBody.put("fromAccount", fromAccount);
+        paymentMessageBody.put("toAccount", toAccount);
+        paymentMessageBody.put("pin", pin);
+        paymentMessageBody.put("amount", amount);
+        paymentMessage.put("body", paymentMessageBody);
+
+        sendMessage("payment", paymentMessage, onResponseListener);
+    }
+
+    public void responseMessage(long id, String type, JSONObject data) {
+        JSONObject message = new JSONObject();
+        message.put("id", id);
+        message.put("type", type);
+        message.put("data", data);
+        String jsonMessage = message.toString();
+        if (Config.DEBUG) System.out.println("[DEBUG] Responed: " + jsonMessage);
+        send(jsonMessage);
     }
 
     public Client(URI uri) {
@@ -63,6 +124,8 @@ public class Client extends WebSocketClient {
                 int code = body.getInt("code");
                 if (code == Codes.SUCCESS) {
                     System.out.println("[INFO] Registered with Gosbank with bank code: " + Config.BANK_CODE);
+
+                    // Do stuff
                 }
                 else {
                     System.out.println("[WARNING] Error with registering to Gosbank, code: " + code);
@@ -95,7 +158,7 @@ public class Client extends WebSocketClient {
             }
 
             if (type.equals("payment")) {
-                // payment request
+                // Payment request
             }
         }
         catch (Exception exception) {
