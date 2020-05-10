@@ -35,8 +35,7 @@ wss.on('connection', function (ws) {
                     receiveBank: data.header.originBank
                 },
                 body: {
-                    success: false,
-                    message: 'You have send a broken message!'
+                    code: 400
                 }
             });
             ws.close();
@@ -61,8 +60,7 @@ wss.on('connection', function (ws) {
                         receiveBank: data.header.originBank
                     },
                     body: {
-                        success: true,
-                        message: 'You have successful registerd by Gosbank!'
+                        code: 200
                     }
                 });
             }
@@ -76,8 +74,7 @@ wss.on('connection', function (ws) {
                         receiveBank: data.header.originBank
                     },
                     body: {
-                        success: false,
-                        message: 'There is already a bank with that bank code connected!'
+                        code: 401
                     }
                 });
                 ws.close();
@@ -103,14 +100,14 @@ wss.on('connection', function (ws) {
                             receiveBank: data.header.originBank
                         },
                         body: {
-                            success: false,
-                            message: 'The Sovjet Bank you tried to message is not connected to Gosbank!'
+                            code: 400
                         }
                     });
                 }
             }
 
             else {
+                // Gosbank supports only Sovjet banks for now!
                 responseMessage(id, type, {
                     header: {
                         originCountry: 'SU',
@@ -119,8 +116,7 @@ wss.on('connection', function (ws) {
                         receiveBank: data.header.originBank
                     },
                     body: {
-                        success: false,
-                        message: 'Gosbank only supports Sovjet Banks for now!'
+                        code: 400
                     }
                 });
             }

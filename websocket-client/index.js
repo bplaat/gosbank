@@ -1,5 +1,8 @@
 // ########### CLIENT CONFIG ###########
 
+// Connect to local running Gosbank server
+const LOCAL_DEBUG_MODE = true;
+
 // Your country code always 'SU'
 const COUNTRY_CODE = 'SU';
 
@@ -21,7 +24,7 @@ function parseAccountParts(account) {
 }
 
 function connectToGosbank() {
-    const ws = new WebSocket('wss://ws.gosbank.ml/');
+    const ws = new WebSocket(LOCAL_DEBUG_MODE ? 'ws://localhost:8080' : 'wss://ws.gosbank.ml/');
 
     const pendingCallbacks = [];
 
@@ -103,7 +106,7 @@ function connectToGosbank() {
             },
             body: {}
         }, function (data) {
-            if (data.body.success) {
+            if (data.body.code == 200) {
                 console.log('Connected with Gosbank with bank code: ' + BANK_CODE);
 
                 var i = 0;
@@ -111,7 +114,7 @@ function connectToGosbank() {
                     var q = i++;
 
                     requestBalance('SU-' + ['BANQ', 'DASB', 'GETB'][Math.floor(Math.random() * 3)] + '-' + q.toString().padStart(8, '0'), '1234', function (data) {
-                        if (data.body.success) {
+                        if (data.body.code == 200) {
                             console.log('Balance account ' + q + ': ' + data.body.balance);
                         }
                         else {
@@ -123,7 +126,7 @@ function connectToGosbank() {
                         'SU-' + ['BANQ', 'DASB', 'GETB'][Math.floor(Math.random() * 3)] + '-' + q.toString().padStart(8, '0'),
                         'SU-' + ['BANQ', 'DASB', 'GETB'][Math.floor(Math.random() * 3)] + '-' + (q + 1).toString().padStart(8, '0'),
                         '1234', Math.random() * 100, function (data) {
-                        if (data.body.success) {
+                        if (data.body.code == 200) {
                             console.log('Payment accepted');
                         }
                         else {
@@ -138,7 +141,7 @@ function connectToGosbank() {
         });
     });
 
-    ws.on('message', function (json_message) {
+    ws.on('message', function (message) {
         const { id, type, data } = JSON.parse(message);
 
         for (var i = 0; i < pendingCallbacks.length; i++) {
@@ -162,8 +165,7 @@ function connectToGosbank() {
                         receiveBank: data.header.originBank
                     },
                     body: {
-                        success: true,
-                        message: 'The pincode is right, here is the balance!',
+                        code: 200,
                         balance: parseFloat((Math.random() * 10000).toFixed(2))
                     }
                 });
@@ -184,8 +186,7 @@ function connectToGosbank() {
                         receiveBank: data.header.originBank
                     },
                     body: {
-                        success: true,
-                        message: 'The payment is processed!'
+                        code: 200
                     }
                 });
             }, Math.random() * 2000 + 500);
