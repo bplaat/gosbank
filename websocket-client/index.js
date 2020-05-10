@@ -106,7 +106,7 @@ function connectToGosbank() {
             },
             body: {}
         }, function (data) {
-            if (data.body.code == 200) {
+            if (data.body.code === 200) {
                 console.log('Connected with Gosbank with bank code: ' + BANK_CODE);
 
                 var i = 0;
@@ -114,7 +114,7 @@ function connectToGosbank() {
                     var q = i++;
 
                     requestBalance('SU-' + ['BANQ', 'DASB', 'GETB'][Math.floor(Math.random() * 3)] + '-' + q.toString().padStart(8, '0'), '1234', function (data) {
-                        if (data.body.code == 200) {
+                        if (data.body.code === 200) {
                             console.log('Balance account ' + q + ': ' + data.body.balance);
                         }
                         else {
@@ -126,7 +126,7 @@ function connectToGosbank() {
                         'SU-' + ['BANQ', 'DASB', 'GETB'][Math.floor(Math.random() * 3)] + '-' + q.toString().padStart(8, '0'),
                         'SU-' + ['BANQ', 'DASB', 'GETB'][Math.floor(Math.random() * 3)] + '-' + (q + 1).toString().padStart(8, '0'),
                         '1234', Math.random() * 100, function (data) {
-                        if (data.body.code == 200) {
+                        if (data.body.code === 200) {
                             console.log('Payment accepted');
                         }
                         else {

@@ -17,9 +17,9 @@ wss.on('connection', function (ws) {
         const { id, type, data } = JSON.parse(message);
 
         if (
-            id == undefined ||
-            type == undefined ||
-            data == undefined ||
+            id === undefined ||
+            type === undefined ||
+            data === undefined ||
             data.header === undefined ||
             data.header.originCountry === undefined ||
             data.header.originBank === undefined ||
