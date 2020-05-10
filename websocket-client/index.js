@@ -139,10 +139,7 @@ function connectToGosbank() {
     });
 
     ws.on('message', function (json_message) {
-        const message = JSON.parse(json_message);
-        const id = message.id;
-        const type = message.type;
-        const data = message.data;
+        const { id, type, data } = JSON.parse(message);
 
         for (var i = 0; i < pendingCallbacks.length; i++) {
             if (pendingCallbacks[i].id === id && pendingCallbacks[i].type === type) {
@@ -200,9 +197,8 @@ function connectToGosbank() {
         setTimeout(connectToGosbank, RECONNECT_TIMEOUT);
     });
 
-    ws.on('error', function (error) {
-        // Ingnore connecting errors reconnect in the close handler
-    });
+    // Ingnore connecting errors reconnect in the close handler
+    ws.on('error', function (error) {});
 }
 
 connectToGosbank();
