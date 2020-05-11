@@ -6,6 +6,7 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONObject;
 
+// Websocket client class
 public class Client extends WebSocketClient {
     public static interface OnResponseListener {
         public abstract void onResponse(JSONObject data);
@@ -35,7 +36,7 @@ public class Client extends WebSocketClient {
         message.put("type", type);
         message.put("data", data);
         String jsonMessage = message.toString();
-        if (Config.DEBUG) System.out.println("[DEBUG] Sent: " + jsonMessage);
+        Log.debug("Sent: " + jsonMessage);
         send(jsonMessage);
     }
 
@@ -94,7 +95,7 @@ public class Client extends WebSocketClient {
         message.put("type", type);
         message.put("data", data);
         String jsonMessage = message.toString();
-        if (Config.DEBUG) System.out.println("[DEBUG] Responed: " + jsonMessage);
+        Log.debug("Responed: " + jsonMessage);
         send(jsonMessage);
     }
 
@@ -105,7 +106,7 @@ public class Client extends WebSocketClient {
     }
 
     public void onOpen(ServerHandshake handshakedata) {
-        if (Config.DEBUG) System.out.println("[DEBUG] Connected");
+        Log.debug("Connected");
 
         JSONObject registerMessage = new JSONObject();
 
@@ -123,12 +124,12 @@ public class Client extends WebSocketClient {
                 JSONObject body = data.getJSONObject("body");
                 int code = body.getInt("code");
                 if (code == Codes.SUCCESS) {
-                    System.out.println("[INFO] Registered with Gosbank with bank code: " + Config.BANK_CODE);
+                    Log.info("Registered with Gosbank with bank code: " + Config.BANK_CODE);
 
                     // Do stuff
                 }
                 else {
-                    System.out.println("[WARNING] Error with registering to Gosbank, code: " + code);
+                    Log.warning("Error with registering to Gosbank, code: " + code);
                 }
             }
         });
@@ -136,7 +137,7 @@ public class Client extends WebSocketClient {
 
     public void onMessage(String jsonMessage) {
         try {
-            if (Config.DEBUG) System.out.println("[DEBUG] Message: " + jsonMessage);
+            Log.debug("Message: " + jsonMessage);
 
             // Parse message
             JSONObject message = new JSONObject(jsonMessage);
@@ -162,25 +163,25 @@ public class Client extends WebSocketClient {
             }
         }
         catch (Exception exception) {
-            exception.printStackTrace();
+            Log.warning(exception);
         }
     }
 
     public void onClose(int code, String reason, boolean remote) {
-        System.out.println("[WARNING] Disconnected, try to reconnect in " + (Config.RECONNECT_TIMEOUT / 1000) + " seconds!");
+        Log.warning("Disconnected, try to reconnect in " + (Config.RECONNECT_TIMEOUT / 1000) + " seconds!");
 
         try {
             Thread.sleep(Config.RECONNECT_TIMEOUT);
         }
         catch (Exception exception) {
-            exception.printStackTrace();
+            Log.error(exception);
         }
 
         tryToConnect();
     }
 
     public void onError(Exception exception) {
-        exception.printStackTrace();
+        Log.warning(exception);
     }
 
     public static void tryToConnect() {
@@ -189,7 +190,7 @@ public class Client extends WebSocketClient {
             client.connect();
         }
         catch (Exception exception) {
-            exception.printStackTrace();
+            Log.error(exception);
         }
     }
 }

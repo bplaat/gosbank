@@ -35,7 +35,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>ml.banq.atm.Main</mainClass>
+                            <mainClass>ml.gosbank.client.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

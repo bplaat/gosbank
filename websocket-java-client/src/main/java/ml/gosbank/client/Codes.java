@@ -1,5 +1,6 @@
 package ml.gosbank.client;
 
+// Static NOOB Codes class
 public class Codes {
     private Codes() {}
 

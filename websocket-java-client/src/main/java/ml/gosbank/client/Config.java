@@ -1,5 +1,6 @@
 package ml.gosbank.client;
 
+// Static config class
 public class Config {
     private Config() {}
 
