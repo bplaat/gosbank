@@ -112,7 +112,7 @@ public class Client extends WebSocketClient {
     public void responseMessage(long id, String type, JSONObject data) {
         JSONObject message = new JSONObject();
         message.put("id", id);
-        message.put("type", type);
+        message.put("type", type + "_response");
         message.put("data", data);
         String jsonMessage = message.toString();
         Log.debug("Responed: " + jsonMessage);
@@ -167,6 +167,8 @@ public class Client extends WebSocketClient {
             long id = message.getLong("id");
             String type = message.getString("type");
             JSONObject data = message.getJSONObject("data");
+            JSONObject header = data.getJSONObject("header");
+            JSONObject body = data.getJSONObject("body");
 
             // Resolve pending callbacks
             for (int i = 0; i < pendingCallbacks.size(); i++) {
@@ -178,11 +180,49 @@ public class Client extends WebSocketClient {
             }
 
             if (type.equals("balance")) {
-                // Balance request
+                Log.info("Balance request from " + body.getString("account"));
+
+                // Fetch balance
+                float balance = (float)(Math.random() * 10000);
+
+                // Send response message back
+                JSONObject balanceMessage = new JSONObject();
+
+                JSONObject balanceMessageHeader = new JSONObject();
+                balanceMessageHeader.put("originCountry", Config.COUNTRY_CODE);
+                balanceMessageHeader.put("originBank", Config.BANK_CODE);
+                balanceMessageHeader.put("receiveCountry", header.getString("originCountry"));
+                balanceMessageHeader.put("receiveBank", header.getString("originBank"));
+                balanceMessage.put("header", balanceMessageHeader);
+
+                JSONObject balanceMessageBody = new JSONObject();
+                balanceMessageBody.put("code", Codes.SUCCESS);
+                balanceMessageBody.put("balance", balance);
+                balanceMessage.put("body", balanceMessageBody);
+
+                responseMessage(id, "balance", balanceMessage);
             }
 
             if (type.equals("payment")) {
-                // Payment request
+                Log.info("Payment request from " + body.getString("from_account") + " to " + body.getString("to_account"));
+
+                // Process payment in database
+
+                // Send response back
+                JSONObject paymentMessage = new JSONObject();
+
+                JSONObject paymentMessageHeader = new JSONObject();
+                paymentMessageHeader.put("originCountry", Config.COUNTRY_CODE);
+                paymentMessageHeader.put("originBank", Config.BANK_CODE);
+                paymentMessageHeader.put("receiveCountry", header.getString("originCountry"));
+                paymentMessageHeader.put("receiveBank", header.getString("originBank"));
+                paymentMessage.put("header", paymentMessageHeader);
+
+                JSONObject paymentMessageBody = new JSONObject();
+                paymentMessageBody.put("code", Codes.SUCCESS);
+                paymentMessage.put("body", paymentMessageBody);
+
+                responseMessage(id, "balance", paymentMessage);
             }
         }
         catch (Exception exception) {
