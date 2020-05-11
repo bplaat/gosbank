@@ -231,6 +231,8 @@ public class Client extends WebSocketClient {
     }
 
     public void onClose(int code, String reason, boolean remote) {
+        connected = false;
+
         Log.warning("Disconnected, try to reconnect in " + (Config.RECONNECT_TIMEOUT / 1000) + " seconds!");
 
         new Thread(() -> {
