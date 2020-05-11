@@ -9,7 +9,7 @@ import org.json.JSONObject;
 // Websocket client class
 public class Client extends WebSocketClient {
     public static interface OnResponseListener {
-        public abstract void onResponse(JSONObject data);
+        public void onResponse(JSONObject data);
     }
 
     public static class CallbackItem {
@@ -18,7 +18,12 @@ public class Client extends WebSocketClient {
         public OnResponseListener onResponseListener;
     }
 
+    private boolean connected;
     private ArrayList<CallbackItem> pendingCallbacks;
+
+    public boolean isConnected() {
+        return connected;
+    }
 
     private void sendMessage(String type, JSONObject data, OnResponseListener onResponseListener) {
         long id = System.currentTimeMillis();
@@ -114,10 +119,24 @@ public class Client extends WebSocketClient {
         send(jsonMessage);
     }
 
-    public Client(URI uri) {
+    private Client(URI uri) {
         super(uri);
-
+        connected = false;
         pendingCallbacks = new ArrayList<CallbackItem>();
+    }
+
+    private static Client instance;
+
+    public static Client getInstance() {
+        if (instance == null) {
+            try {
+                instance = new Client(new URI(Config.GOSBANK_URL));
+            }
+            catch (Exception exception) {
+                Log.error(exception);
+            }
+        }
+        return instance;
     }
 
     public void onOpen(ServerHandshake handshakedata) {
@@ -127,6 +146,8 @@ public class Client extends WebSocketClient {
             JSONObject body = data.getJSONObject("body");
             int code = body.getInt("code");
             if (code == Codes.SUCCESS) {
+                connected = true;
+
                 Log.info("Registered with Gosbank with bank code: " + Config.BANK_CODE);
 
                 // Do stuff
@@ -172,27 +193,19 @@ public class Client extends WebSocketClient {
     public void onClose(int code, String reason, boolean remote) {
         Log.warning("Disconnected, try to reconnect in " + (Config.RECONNECT_TIMEOUT / 1000) + " seconds!");
 
-        try {
-            Thread.sleep(Config.RECONNECT_TIMEOUT);
-        }
-        catch (Exception exception) {
-            Log.error(exception);
-        }
+        new Thread(() -> {
+            try {
+                Thread.sleep(Config.RECONNECT_TIMEOUT);
+            }
+            catch (Exception exception) {
+                Log.error(exception);
+            }
 
-        tryToConnect();
+            reconnect();
+        }).start();
     }
 
     public void onError(Exception exception) {
         Log.warning(exception);
-    }
-
-    public static void tryToConnect() {
-        try {
-            Client client = new Client(new URI(Config.GOSBANK_URL));
-            client.connect();
-        }
-        catch (Exception exception) {
-            Log.error(exception);
-        }
     }
 }
