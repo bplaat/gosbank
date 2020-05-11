@@ -40,6 +40,21 @@ public class Client extends WebSocketClient {
         send(jsonMessage);
     }
 
+    public void sendRegisterMessage(OnResponseListener onResponseListener) {
+        JSONObject registerMessage = new JSONObject();
+
+        JSONObject registerMessageHeader = new JSONObject();
+        registerMessageHeader.put("originCountry", Config.COUNTRY_CODE);
+        registerMessageHeader.put("originBank", Config.BANK_CODE);
+        registerMessageHeader.put("receiveCountry", "SU");
+        registerMessageHeader.put("receiveBank", "GOSB");
+        registerMessage.put("header", registerMessageHeader);
+
+        registerMessage.put("body", new JSONObject());
+
+        sendMessage("register", registerMessage, onResponseListener);
+    }
+
     public void sendBalanceMessage(String account, String pin, OnResponseListener onResponseListener) {
         Utils.AccountParts accountParts = Utils.parseAccountParts(account);
 
@@ -108,29 +123,16 @@ public class Client extends WebSocketClient {
     public void onOpen(ServerHandshake handshakedata) {
         Log.debug("Connected");
 
-        JSONObject registerMessage = new JSONObject();
+        sendRegisterMessage((JSONObject data) -> {
+            JSONObject body = data.getJSONObject("body");
+            int code = body.getInt("code");
+            if (code == Codes.SUCCESS) {
+                Log.info("Registered with Gosbank with bank code: " + Config.BANK_CODE);
 
-        JSONObject registerMessageHeader = new JSONObject();
-        registerMessageHeader.put("originCountry", Config.COUNTRY_CODE);
-        registerMessageHeader.put("originBank", Config.BANK_CODE);
-        registerMessageHeader.put("receiveCountry", "SU");
-        registerMessageHeader.put("receiveBank", "GOSB");
-        registerMessage.put("header", registerMessageHeader);
-
-        registerMessage.put("body", new JSONObject());
-
-        sendMessage("register", registerMessage, new OnResponseListener() {
-            public void onResponse(JSONObject data) {
-                JSONObject body = data.getJSONObject("body");
-                int code = body.getInt("code");
-                if (code == Codes.SUCCESS) {
-                    Log.info("Registered with Gosbank with bank code: " + Config.BANK_CODE);
-
-                    // Do stuff
-                }
-                else {
-                    Log.warning("Error with registering to Gosbank, code: " + code);
-                }
+                // Do stuff
+            }
+            else {
+                Log.warning("Error with registering to Gosbank, code: " + code);
             }
         });
     }

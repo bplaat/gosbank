@@ -11,5 +11,5 @@ public class Config {
     public static final String COUNTRY_CODE = "SU";
     public static final String BANK_CODE = "BANQ";
 
-    public static final int RECONNECT_TIMEOUT = 2 * 1000;
+    public static final int RECONNECT_TIMEOUT = 5 * 1000;
 }
