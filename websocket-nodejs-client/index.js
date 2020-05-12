@@ -41,14 +41,14 @@ function connectToGosbank() {
     }
 
     function requestBalance(account, pin, callback) {
-        const to_account_parts = parseAccountParts(account);
+        const toAccountParts = parseAccountParts(account);
 
         requestMessage('balance', {
             header: {
                 originCountry: COUNTRY_CODE,
                 originBank: BANK_CODE,
-                receiveCountry: to_account_parts.country,
-                receiveBank: to_account_parts.bank
+                receiveCountry: toAccountParts.country,
+                receiveBank: toAccountParts.bank
             },
             body: {
                 account: account,
@@ -57,38 +57,38 @@ function connectToGosbank() {
         }, callback);
     }
 
-    function requestPayment(from_account, to_account, pin, amount, callback) {
-        const form_account_parts = parseAccountParts(from_account);
-        const to_account_parts = parseAccountParts(to_account);
+    function requestPayment(fromAccount, toAccount, pin, amount, callback) {
+        const formAccountParts = parseAccountParts(fromAccount);
+        const toAccountParts = parseAccountParts(toAccount);
 
-        if (form_account_parts.bank !== BANK_CODE) {
+        if (formAccountParts.bank !== BANK_CODE) {
             requestMessage('payment', {
                 header: {
                     originCountry: COUNTRY_CODE,
                     originBank: BANK_CODE,
-                    receiveCountry: form_account_parts.country,
-                    receiveBank: form_account_parts.bank
+                    receiveCountry: formAccountParts.country,
+                    receiveBank: formAccountParts.bank
                 },
                 body: {
-                    from_account: from_account,
-                    to_account: to_account,
+                    fromAccount: fromAccount,
+                    toAccount: toAccount,
                     pin: pin,
                     amount: amount
                 }
             }, callback);
         }
 
-        if (to_account_parts.bank !== BANK_CODE) {
+        if (toAccountParts.bank !== BANK_CODE) {
             requestMessage('payment', {
                 header: {
                     originCountry: COUNTRY_CODE,
                     originBank: BANK_CODE,
-                    receiveCountry: to_account_parts.country,
-                    receiveBank: to_account_parts.bank
+                    receiveCountry: toAccountParts.country,
+                    receiveBank: toAccountParts.bank
                 },
                 body: {
-                    from_account: from_account,
-                    to_account: to_account,
+                    fromAccount: fromAccount,
+                    toAccount: toAccount,
                     pin: pin,
                     amount: amount
                 }
@@ -173,7 +173,7 @@ function connectToGosbank() {
         }
 
         if (type === 'payment') {
-            console.log('Payment request for: ' + data.body.to_account);
+            console.log('Payment request for: ' + data.body.toAccount);
 
             // Add payment to database
 

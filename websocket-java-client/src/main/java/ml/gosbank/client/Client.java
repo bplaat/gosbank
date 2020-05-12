@@ -204,7 +204,7 @@ public class Client extends WebSocketClient {
             }
 
             if (type.equals("payment")) {
-                Log.info("Payment request from " + body.getString("from_account") + " to " + body.getString("to_account"));
+                Log.info("Payment request from " + body.getString("fromAccount") + " to " + body.getString("toAccount"));
 
                 // Process payment in database
 
