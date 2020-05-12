@@ -236,8 +236,8 @@ When you make a withdraw the users always pays to the first account (`00000001`)
             "receiveBank": "DASB"
         },
         "body": {
-            "fromAccount": "SU-DASB-00000010",
-            "toAccount": "SU-BANQ-00000001",
+            "fromAccount": "SU-BANQ-00000010",
+            "toAccount": "SU-DASB-00000001",
             "pin": "1234",
             "amount": 4.56
         }
