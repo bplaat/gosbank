@@ -3,8 +3,8 @@
 // Connect to local running Gosbank server
 const LOCAL_DEBUG_MODE = true;
 
-// Your country code always 'SU'
-const COUNTRY_CODE = 'SU';
+// Your country code always 'SO'
+const COUNTRY_CODE = 'SO';
 
 // Your bank code
 const BANK_CODE = process.argv[2] || 'BANQ';
@@ -101,7 +101,7 @@ function connectToGosbank() {
             header: {
                 originCountry: COUNTRY_CODE,
                 originBank: BANK_CODE,
-                receiveCountry: 'SU',
+                receiveCountry: 'SO',
                 receiveBank: 'GOSB'
             },
             body: {}
@@ -113,7 +113,7 @@ function connectToGosbank() {
                 setInterval(function () {
                     var q = i++;
 
-                    requestBalance('SU-' + ['BANQ', 'DASB', 'GETB'][Math.floor(Math.random() * 3)] + '-' + q.toString().padStart(8, '0'), '1234', function (data) {
+                    requestBalance('SO-' + ['BANQ', 'DASB', 'GETB'][Math.floor(Math.random() * 3)] + '-' + q.toString().padStart(8, '0'), '1234', function (data) {
                         if (data.body.code === 200) {
                             console.log('Balance account ' + q + ': ' + data.body.balance);
                         }
@@ -123,8 +123,8 @@ function connectToGosbank() {
                     });
 
                     requestPayment(
-                        'SU-' + ['BANQ', 'DASB', 'GETB'][Math.floor(Math.random() * 3)] + '-' + q.toString().padStart(8, '0'),
-                        'SU-' + ['BANQ', 'DASB', 'GETB'][Math.floor(Math.random() * 3)] + '-' + (q + 1).toString().padStart(8, '0'),
+                        'SO-' + ['BANQ', 'DASB', 'GETB'][Math.floor(Math.random() * 3)] + '-' + q.toString().padStart(8, '0'),
+                        'SO-' + ['BANQ', 'DASB', 'GETB'][Math.floor(Math.random() * 3)] + '-' + (q + 1).toString().padStart(8, '0'),
                         '1234', Math.random() * 100, function (data) {
                         if (data.body.code === 200) {
                             console.log('Payment accepted');

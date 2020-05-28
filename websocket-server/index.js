@@ -1,62 +1,58 @@
+// The land node constants
+const COUNTRY_CODE = 'SO';
+const BANK_CODE = 'GOSB';
+
+// Load the websocket library
 const WebSocket = require('ws');
 
+// Create a new websocket server at port 8080
 const wss = new WebSocket.Server({ port: process.env.PORT || 8080 });
 
+// Bank connection holder
 const connectedBanks = {};
 
+// On websocket connect listener
 wss.on('connection', function (ws) {
+    // Bank code holder
     let bankCode;
 
+    // Function witch sends a message back
     function responseMessage(id, type, data) {
         if (ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify({ id: id, type: type + '_response', data: data }));
         }
     }
 
+    // On message listener
     ws.on('message', function (message) {
         try {
+            // Parse the message
             const { id, type, data } = JSON.parse(message);
 
-            if (
-                id === undefined ||
-                type === undefined ||
-                data === undefined ||
-                data.header === undefined ||
-                data.header.originCountry === undefined ||
-                data.header.originBank === undefined ||
-                data.header.receiveCountry === undefined ||
-                data.header.receiveBank === undefined ||
-                data.body === undefined
-            ) {
-                responseMessage(id, 'register', {
-                    header: {
-                        originCountry: 'SU',
-                        originBank: 'GOSB',
-                        receiveCountry: data.header.originCountry,
-                        receiveBank: data.header.originBank
-                    },
-                    body: {
-                        code: 400
-                    }
-                });
-                ws.close();
-            }
-
-            else if (type === 'register') {
-                if (connectedBanks[data.header.originBank] === undefined) {
+            // On register message
+            if (type === 'register') {
+                // Check if country the right one
+                // And the bank is not already connected
+                if (
+                    data.header.originCountry == COUNTRY_CODE &&
+                    connectedBanks[data.header.originBank] === undefined
+                ) {
+                    // Register bank
                     bankCode = data.header.originBank;
                     connectedBanks[bankCode] = ws;
                     console.log(bankCode + ' registered');
 
+                    // Register on connection close listener
                     ws.on('close', function () {
                         connectedBanks[bankCode] = undefined;
                         console.log(bankCode + ' disconnected');
                     });
 
+                    // Send sucess message response
                     responseMessage(id, 'register', {
                         header: {
-                            originCountry: 'SU',
-                            originBank: 'GOSB',
+                            originCountry: COUNTRY_CODE,
+                            originBank: BANK_CODE,
                             receiveCountry: data.header.originCountry,
                             receiveBank: data.header.originBank
                         },
@@ -67,10 +63,11 @@ wss.on('connection', function (ws) {
                 }
 
                 else {
+                    // Send auth failt message response
                     responseMessage(id, 'register', {
                         header: {
-                            originCountry: 'SU',
-                            originBank: 'GOSB',
+                            originCountry: COUNTRY_CODE,
+                            originBank: BANK_CODE,
                             receiveCountry: data.header.originCountry,
                             receiveBank: data.header.originBank
                         },
@@ -78,25 +75,32 @@ wss.on('connection', function (ws) {
                             code: 401
                         }
                     });
+
+                    // Close the connection
                     ws.close();
                 }
             }
 
-            else if (bankCode !== undefined) {
-                if (data.header.receiveCountry === 'SU') {
+            // Check if the bank is connected
+            if (bankCode !== undefined) {
+                console.log(data.header.originBank + ' -> ' + data.header.receiveBank + ': ' + type);
+
+                // When the message is to another sovjet bank
+                if (data.header.receiveCountry === COUNTRY_CODE) {
+                    // When the bank is connected send message trough
                     if (
                         connectedBanks[data.header.receiveBank] !== undefined &&
                         connectedBanks[data.header.receiveBank].readyState === WebSocket.OPEN
                     ) {
                         connectedBanks[data.header.receiveBank].send(message);
-                        console.log(data.header.originBank + ' -> ' + data.header.receiveBank + ': ' + type);
                     }
 
+                    // Or send broken message response
                     else {
                         responseMessage(id, type, {
                             header: {
-                                originCountry: 'SU',
-                                originBank: 'GOSB',
+                                originCountry: COUNTRY_CODE,
+                                originBank: BANK_CODE,
                                 receiveCountry: data.header.originCountry,
                                 receiveBank: data.header.originBank
                             },
@@ -107,12 +111,12 @@ wss.on('connection', function (ws) {
                     }
                 }
 
+                // Gosbank supports only Sovjet banks for now!
                 else {
-                    // Gosbank supports only Sovjet banks for now!
                     responseMessage(id, type, {
                         header: {
-                            originCountry: 'SU',
-                            originBank: 'GOSB',
+                            originCountry: COUNTRY_CODE,
+                            originBank: BANK_CODE,
                             receiveCountry: data.header.originCountry,
                             receiveBank: data.header.originBank
                         },
@@ -124,14 +128,16 @@ wss.on('connection', function (ws) {
             }
         }
 
-        // When a error is created close connection
+        // When a error is thrown
         catch (exception) {
+            // Log the exception
             console.log(exception);
 
-            responseMessage(id, 'register', {
+            // Send broken message back
+            responseMessage(id, type, {
                 header: {
-                    originCountry: 'SU',
-                    originBank: 'GOSB',
+                    originCountry: COUNTRY_CODE,
+                    originBank: BANK_CODE,
                     receiveCountry: data.header.originCountry,
                     receiveBank: data.header.originBank
                 },
@@ -139,6 +145,8 @@ wss.on('connection', function (ws) {
                     code: 400
                 }
             });
+
+            // Close connection
             ws.close();
         }
     });

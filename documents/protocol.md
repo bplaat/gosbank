@@ -23,9 +23,9 @@ Every websocket message is send in JSON to and from Gosbank, in the following co
     "type": "register",
     "data": {
         "header": {
-            "originCountry": "SU",
+            "originCountry": "SO",
             "originBank": "GOSB",
-            "receiveCountry": "SU",
+            "receiveCountry": "SO",
             "receiveBank": "BANQ"
         },
         "body": {}
@@ -40,9 +40,9 @@ When you send a broken message or when you try to send a message to a bank witch
     "type": "register_response",
     "data": {
         "header": {
-            "originCountry": "SU",
+            "originCountry": "SO",
             "originBank": "GOSB",
-            "receiveCountry": "SU",
+            "receiveCountry": "SO",
             "receiveBank": "BANQ"
         },
         "body": {
@@ -63,9 +63,9 @@ Send to Gosbank when connection is opened:
     "type": "register",
     "data": {
         "header": {
-            "originCountry": "SU",
+            "originCountry": "SO",
             "originBank": "BANQ",
-            "receiveCountry": "SU",
+            "receiveCountry": "SO",
             "receiveBank": "GOSB"
         },
         "body": {}
@@ -81,9 +81,9 @@ When successful and you are registered:
     "type": "register_response",
     "data": {
         "header": {
-            "originCountry": "SU",
+            "originCountry": "SO",
             "originBank": "GOSB",
-            "receiveCountry": "SU",
+            "receiveCountry": "SO",
             "receiveBank": "BANQ"
         },
         "body": {
@@ -100,9 +100,9 @@ When some own else is already connected with your bankcode:
     "type": "register_response",
     "data": {
         "header": {
-            "originCountry": "SU",
+            "originCountry": "SO",
             "originBank": "GOSB",
-            "receiveCountry": "SU",
+            "receiveCountry": "SO",
             "receiveBank": "BANQ"
         },
         "body": {
@@ -123,13 +123,13 @@ Send this message when you want to get the balance of some bank account
     "type": "balance",
     "data": {
         "header": {
-            "originCountry": "SU",
+            "originCountry": "SO",
             "originBank": "BANQ",
-            "receiveCountry": "SU",
+            "receiveCountry": "SO",
             "receiveBank": "DASB"
         },
         "body": {
-            "account": "SU-BANQ-00000003",
+            "account": "SO-BANQ-00000003",
             "pin": "1234"
         }
     }
@@ -144,9 +144,9 @@ Send this message when you want to get the balance of some bank account
     "type": "balance_response",
     "data": {
         "header": {
-            "originCountry": "SU",
+            "originCountry": "SO",
             "originBank": "DASB",
-            "receiveCountry": "SU",
+            "receiveCountry": "SO",
             "receiveBank": "BANQ"
         },
         "body": {
@@ -164,9 +164,9 @@ Send this message when you want to get the balance of some bank account
     "type": "balance_response",
     "data": {
         "header": {
-            "originCountry": "SU",
+            "originCountry": "SO",
             "originBank": "GOSB",
-            "receiveCountry": "SU",
+            "receiveCountry": "SO",
             "receiveBank": "BANQ"
         },
         "body": {
@@ -184,9 +184,9 @@ Send this message when you want to get the balance of some bank account
     "type": "balance_response",
     "data": {
         "header": {
-            "originCountry": "SU",
+            "originCountry": "SO",
             "originBank": "GOSB",
-            "receiveCountry": "SU",
+            "receiveCountry": "SO",
             "receiveBank": "BANQ"
         },
         "body": {
@@ -203,9 +203,9 @@ Send this message when you want to get the balance of some bank account
     "type": "balance_response",
     "data": {
         "header": {
-            "originCountry": "SU",
+            "originCountry": "SO",
             "originBank": "GOSB",
-            "receiveCountry": "SU",
+            "receiveCountry": "SO",
             "receiveBank": "BANQ"
         },
         "body": {
@@ -230,14 +230,14 @@ When you make a withdraw the users always pays to the first account (`00000001`)
     "type": "payment",
     "data": {
         "header": {
-            "originCountry": "SU",
+            "originCountry": "SO",
             "originBank": "BANQ",
-            "receiveCountry": "SU",
+            "receiveCountry": "SO",
             "receiveBank": "DASB"
         },
         "body": {
-            "fromAccount": "SU-BANQ-00000010",
-            "toAccount": "SU-DASB-00000001",
+            "fromAccount": "SO-BANQ-00000010",
+            "toAccount": "SO-DASB-00000001",
             "pin": "1234",
             "amount": 4.56
         }
@@ -253,9 +253,9 @@ When you make a withdraw the users always pays to the first account (`00000001`)
     "type": "payment_response",
     "data": {
         "header": {
-            "originCountry": "SU",
+            "originCountry": "SO",
             "originBank": "DASB",
-            "receiveCountry": "SU",
+            "receiveCountry": "SO",
             "receiveBank": "BANQ"
         },
         "body": {
@@ -272,9 +272,9 @@ When you make a withdraw the users always pays to the first account (`00000001`)
     "type": "payment_response",
     "data": {
         "header": {
-            "originCountry": "SU",
+            "originCountry": "SO",
             "originBank": "DASB",
-            "receiveCountry": "SU",
+            "receiveCountry": "SO",
             "receiveBank": "BANQ"
         },
         "body": {
@@ -292,9 +292,9 @@ When you make a withdraw the users always pays to the first account (`00000001`)
     "type": "payment_response",
     "data": {
         "header": {
-            "originCountry": "SU",
+            "originCountry": "SO",
             "originBank": "DASB",
-            "receiveCountry": "SU",
+            "receiveCountry": "SO",
             "receiveBank": "BANQ"
         },
         "body": {
@@ -311,9 +311,9 @@ When you make a withdraw the users always pays to the first account (`00000001`)
     "type": "payment_response",
     "data": {
         "header": {
-            "originCountry": "SU",
+            "originCountry": "SO",
             "originBank": "DASB",
-            "receiveCountry": "SU",
+            "receiveCountry": "SO",
             "receiveBank": "BANQ"
         },
         "body": {
@@ -330,9 +330,9 @@ When you make a withdraw the users always pays to the first account (`00000001`)
     "type": "payment_response",
     "data": {
         "header": {
-            "originCountry": "SU",
+            "originCountry": "SO",
             "originBank": "DASB",
-            "receiveCountry": "SU",
+            "receiveCountry": "SO",
             "receiveBank": "BANQ"
         },
         "body": {

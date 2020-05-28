@@ -16,7 +16,7 @@ public class Main {
         while (true) {
             // Check if we are connected
             if (Client.getInstance().isConnected()) {
-                String account = String.format("SU-%s-%08d", bankCodes[(int)(Math.random() * bankCodes.length)], number++);
+                String account = String.format("SO-%s-%08d", bankCodes[(int)(Math.random() * bankCodes.length)], number++);
                 Client.getInstance().sendBalanceMessage(account, "1234", (JSONObject data) -> {
                     JSONObject body = data.getJSONObject("body");
                     int code = body.getInt("code");
@@ -28,8 +28,8 @@ public class Main {
                     }
                 });
 
-                String fromAccount = String.format("SU-%s-%08d", Config.BANK_CODE, number++);
-                String toAccount = String.format("SU-%s-%08d", bankCodes[(int)(Math.random() * bankCodes.length)], number++);
+                String fromAccount = String.format("SO-%s-%08d", Config.BANK_CODE, number++);
+                String toAccount = String.format("SO-%s-%08d", bankCodes[(int)(Math.random() * bankCodes.length)], number++);
                 float amount = (float)(Math.random() * 500);
                 Client.getInstance().sendPaymentMessage(fromAccount, toAccount, "1234", amount, (JSONObject data) -> {
                     JSONObject body = data.getJSONObject("body");

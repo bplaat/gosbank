@@ -51,7 +51,7 @@ public class Client extends WebSocketClient {
         JSONObject registerMessageHeader = new JSONObject();
         registerMessageHeader.put("originCountry", Config.COUNTRY_CODE);
         registerMessageHeader.put("originBank", Config.BANK_CODE);
-        registerMessageHeader.put("receiveCountry", "SU");
+        registerMessageHeader.put("receiveCountry", "SO");
         registerMessageHeader.put("receiveBank", "GOSB");
         registerMessage.put("header", registerMessageHeader);
 
