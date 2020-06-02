@@ -7,4 +7,4 @@ if (isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] == 'gosbank.local') {
 }
 
 define('APP_NAME', 'Gosbank');
-define('APP_VERSION', '0.2');
+define('APP_VERSION', '0.3');

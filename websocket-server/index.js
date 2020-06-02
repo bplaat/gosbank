@@ -81,8 +81,8 @@ wss.on('connection', function (ws) {
                 }
             }
 
-            // Check if the bank is connected
-            if (bankCode !== undefined) {
+            // Else check if the bank is connected
+            else if (bankCode !== undefined) {
                 console.log(data.header.originBank + ' -> ' + data.header.receiveBank + ': ' + type);
 
                 // When the message is to another sovjet bank

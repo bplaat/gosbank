@@ -1,9 +1,10 @@
-var CACHE_NAME = '{{ strtolower(APP_NAME) }}-v{{ APP_VERSION }}';
-var filesToCache = [
+const CACHE_NAME = '{{ strtolower(APP_NAME) }}-v{{ APP_VERSION }}';
+const filesToCache = [
     '/offline',
     '/style.min.css',
     '/script.min.js',
-    '/logo.png'
+    '/logo.png',
+    '/anthem.m4a'
 ];
 
 self.addEventListener('install', function (event) {
