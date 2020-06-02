@@ -222,7 +222,7 @@ public class Client extends WebSocketClient {
                 paymentMessageBody.put("code", Codes.SUCCESS);
                 paymentMessage.put("body", paymentMessageBody);
 
-                responseMessage(id, "balance", paymentMessage);
+                responseMessage(id, "payment", paymentMessage);
             }
         }
         catch (Exception exception) {

@@ -1,5 +1,7 @@
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/serviceworker.min.js');
+    navigator.serviceWorker.register('/serviceworker.min.js').then(function (registration) {
+        registration.update();
+    });
 }
 
 const logo = document.getElementById('logo');
