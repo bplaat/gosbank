@@ -51,8 +51,15 @@ socket.emit('register', {
     }
 });
 
-// Print connected message
-console.log('Connected to the NOOB');
+// On register response message
+socket.on('response', function (response) {
+    if (response.code == 201) {
+        console.log('Connected to the NOOB');
+    } else {
+        console.log('Can\'t connect to the NOOB: ', response.message);
+        socket.disconnect();
+    }
+})
 
 // On a balance request
 socket.on('balance', function (data) {
@@ -82,7 +89,7 @@ socket.on('withdraw', function (data) {
             data: {
                 header: data.header,
                 body: {
-                    fromAccount: data.header.originCountry + '-' + data.header.originBank + '-' + data.body.account,
+                    fromAccount: data.header.originCountry + '-' + data.header.originBank + '-' + parseInt(data.body.account).padStart(8, '0'),
                     toAccount: data.header.receiveCountry + '-' + data.header.receiveBank + '-00000001',
                     pin: data.body.pin,
                     amount: data.body.amount
@@ -175,7 +182,8 @@ wss.on('connection', function (ws) {
 
             // Else check if the bank is connected
             else if (bankCode !== undefined) {
-                console.log(data.header.originBank + ' -> ' + data.header.receiveBank + ': ' + type);
+                console.log(data.header.originCountry + '-' + data.header.originBank + ' -> ' +
+                    data.header.receiveCountry + '-' + data.header.receiveBank + ': ' + type);
 
                 // When the message is to another sovjet bank
                 if (data.header.receiveCountry === COUNTRY_CODE) {
@@ -217,14 +225,8 @@ wss.on('connection', function (ws) {
 
                         // When balance response message
                         if (type === 'balance_response') {
-                            socket.emit('balance', {
-                                data: data.header,
-                                body: {
-                                    code: data.body.code,
-                                    message: codeMessages[data.body.code],
-                                    balance: data.body.balance
-                                }
-                            });
+                            data.body.message = codeMessages[data.body.code];
+                            socket.emit('balance', data);
                         }
 
                         // When payment message
@@ -262,13 +264,8 @@ wss.on('connection', function (ws) {
 
                         // When payment response message
                         if (type === 'payment_response') {
-                            socket.emit('payment', {
-                                data: data.header,
-                                body: {
-                                    code: data.body.code,
-                                    message: codeMessages[data.body.code]
-                                }
-                            });
+                            data.body.message = codeMessages[data.body.code];
+                            socket.emit('payment', data);
                         }
                     }
 
