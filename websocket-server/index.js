@@ -29,12 +29,13 @@ const io = require('socket.io-client');
 // Create a new websocket server at port 8080
 const wss = new WebSocket.Server({ port: process.env.PORT || 8080 });
 
-// Parse account parts
+// Function that parses account parts
 function parseAccountParts(account) {
+    const parts = account.split('-');
     return {
-        country: account.substring(0, 2),
-        bank: account.substring(3, 7),
-        account: parseInt(account.substring(8))
+        country: parts[0],
+        bank: parts[1],
+        account: parseInt(parts[2])
     };
 }
 

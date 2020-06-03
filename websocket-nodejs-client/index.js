@@ -15,11 +15,13 @@ const RECONNECT_TIMEOUT = 2 * 1000;
 // ########### CLIENT CODE ###########
 const WebSocket = require('ws');
 
+// Function that parses account parts
 function parseAccountParts(account) {
+    const parts = account.split('-');
     return {
-        country: account.substring(0, 2),
-        bank: account.substring(3, 7),
-        account: parseInt(account.substring(8))
+        country: parts[0],
+        bank: parts[1],
+        account: parseInt(parts[2])
     };
 }
 

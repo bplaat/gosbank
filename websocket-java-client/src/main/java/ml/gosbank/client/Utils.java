@@ -13,10 +13,11 @@ public class Utils {
 
     // Parses an account string to its parts
     public static AccountParts parseAccountParts(String account) {
+        String[] parts = account.split("-");
         AccountParts accountParts = new AccountParts();
-        accountParts.country = account.substring(0, 2);
-        accountParts.bank = account.substring(3, 7);
-        accountParts.account = Integer.parseInt(account.substring(8));
+        accountParts.country = parts[0];
+        accountParts.bank = parts[1];
+        accountParts.account = Integer.parseInt(parts[2]);
         return accountParts;
     }
 }
