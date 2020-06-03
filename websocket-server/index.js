@@ -69,6 +69,11 @@ socket.on('balance', function (data) {
         connectedBanks[data.header.receiveBank] !== undefined &&
         connectedBanks[data.header.receiveBank].readyState === WebSocket.OPEN
     ) {
+        console.log(data.header.originCountry + '-' + data.header.originBank + ' -> ' +
+            data.header.receiveCountry + '-' + data.header.receiveBank + ': balance ' + JSON.stringify(data.body));
+
+        console.log('Sending to ' + data.header.receiveBank + ' client...');
+
         connectedBanks[data.header.receiveBank].send({
             id: Date.now(),
             type: 'balance',
@@ -84,6 +89,11 @@ socket.on('withdraw', function (data) {
         connectedBanks[data.header.receiveBank] !== undefined &&
         connectedBanks[data.header.receiveBank].readyState === WebSocket.OPEN
     ) {
+        console.log(data.header.originCountry + '-' + data.header.originBank + ' -> ' +
+            data.header.receiveCountry + '-' + data.header.receiveBank + ': payment ' + JSON.stringify(data.body));
+
+        console.log('Sending to ' + data.header.receiveBank + ' client...');
+
         connectedBanks[data.header.receiveBank].send({
             id: Date.now(),
             type: 'payment',
@@ -119,6 +129,11 @@ wss.on('connection', function (ws) {
     // Function witch sends a message back
     function responseMessage(id, type, data) {
         if (ws.readyState === WebSocket.OPEN) {
+            console.log(data.header.originCountry + '-' + data.header.originBank + ' -> ' +
+                    data.header.receiveCountry + '-' + data.header.receiveBank + ': ' + type + ' ' + JSON.stringify(data.body));
+
+            console.log('Sending to ' + data.header.receiveBank + ' client...');
+
             ws.send(JSON.stringify({ id: id, type: type + '_response', data: data }));
         }
     }
@@ -128,6 +143,9 @@ wss.on('connection', function (ws) {
         try {
             // Parse the message
             const { id, type, data } = JSON.parse(message);
+
+            console.log(data.header.originCountry + '-' + data.header.originBank + ' -> ' +
+                data.header.receiveCountry + '-' + data.header.receiveBank + ': ' + type + ' ' + JSON.stringify(data.body));
 
             // On register message
             if (type === 'register') {
@@ -183,9 +201,6 @@ wss.on('connection', function (ws) {
 
             // Else check if the bank is connected
             else if (bankCode !== undefined) {
-                console.log(data.header.originCountry + '-' + data.header.originBank + ' -> ' +
-                    data.header.receiveCountry + '-' + data.header.receiveBank + ': ' + type);
-
                 // When the message is to another sovjet bank
                 if (data.header.receiveCountry === COUNTRY_CODE) {
                     // When the bank is connected send message trough
@@ -193,6 +208,7 @@ wss.on('connection', function (ws) {
                         connectedBanks[data.header.receiveBank] !== undefined &&
                         connectedBanks[data.header.receiveBank].readyState === WebSocket.OPEN
                     ) {
+                        console.log('Sending to ' + data.header.receiveBank + ' client...');
                         connectedBanks[data.header.receiveBank].send(message);
                     }
 
@@ -219,7 +235,9 @@ wss.on('connection', function (ws) {
                         // When balance message
                         if (type === 'balance') {
                             // Send to NOOB and send the response back
+                            console.log('Sending to NOOB...');
                             socket.emit('balance', data, function (response) {
+                                console.log('Response from NOOB: ' + JSON.stringify(response.body));
                                 responseMessage(id, 'balance', reponse);
                             });
                         }
@@ -227,6 +245,7 @@ wss.on('connection', function (ws) {
                         // When balance response message
                         if (type === 'balance_response') {
                             data.body.message = codeMessages[data.body.code];
+                            console.log('Sending to NOOB...');
                             socket.emit('balance', data);
                         }
 
@@ -235,6 +254,7 @@ wss.on('connection', function (ws) {
                             // Check to account is 1
                             if (parseAccountParts(data.body.toAccount) === 1) {
                                 // Send to NOOB and send the response back
+                                console.log('Sending to NOOB...');
                                 socket.emit('withdraw', {
                                     header: data.header,
                                     body: {
@@ -243,6 +263,7 @@ wss.on('connection', function (ws) {
                                         amount: data.body.amount
                                     }
                                 }, function (response) {
+                                    console.log('Response from NOOB: ' + JSON.stringify(response.body));
                                     responseMessage(id, 'payment', reponse);
                                 });
                             }
@@ -266,6 +287,7 @@ wss.on('connection', function (ws) {
                         // When payment response message
                         if (type === 'payment_response') {
                             data.body.message = codeMessages[data.body.code];
+                            console.log('Sending to NOOB...');
                             socket.emit('payment', data);
                         }
                     }
@@ -291,7 +313,7 @@ wss.on('connection', function (ws) {
         // When a error is thrown
         catch (exception) {
             // Log the exception
-            console.log(exception);
+            console.log('Error with ' + data.header.originBank + ' client:', exception);
 
             // Send broken message back
             responseMessage(id, type, {
