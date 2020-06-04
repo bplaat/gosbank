@@ -43,27 +43,25 @@ function parseAccountParts(account) {
 const connectedBanks = {};
 
 // Connect to the NOOB
-const socket = io(NOOB_ADDRESS);
+const noob = io(NOOB_ADDRESS);
 
 // Register with the land code
-socket.emit('register', {
+noob.emit('register', {
     header: {
         country: COUNTRY_CODE
     }
 });
-
-// On register response message
-socket.on('response', function (response) {
+noob.once('response', function (response) {
     if (response.code == 201) {
         console.log('Connected to the NOOB');
     } else {
         console.log('Can\'t connect to the NOOB: ', response.message);
-        socket.disconnect();
+        noob.disconnect();
     }
-})
+});
 
 // On a balance request
-socket.on('balance', function (data) {
+noob.on('balance', function (data) {
     // When bank is connected send through
     if (
         connectedBanks[data.header.receiveBank] !== undefined &&
@@ -89,7 +87,7 @@ socket.on('balance', function (data) {
 });
 
 // On a withdraw request
-socket.on('withdraw', function (data) {
+noob.on('withdraw', function (data) {
     // When bank is connected send through
     if (
         connectedBanks[data.header.receiveBank] !== undefined &&
@@ -117,17 +115,17 @@ socket.on('withdraw', function (data) {
 });
 
 // NOOB connection error handler
-socket.on('error', function (error) {
+noob.on('error', function (error) {
     console.log('Error with NOOB connection:', error);
 });
 
 // NOOB disconnect handler
-socket.on('disconnect', function () {
+noob.on('disconnect', function () {
     console.log('Disconnected from NOOB, try to reconnect in ' + (RECONNECT_TIMEOUT / 1000).toFixed(0) + ' seconds!');
-    setTimeout(socket.open, RECONNECT_TIMEOUT);
+    setTimeout(noob.open, RECONNECT_TIMEOUT);
 });
 
-// On websocket connect listener
+// On client connection listener
 wss.on('connection', function (ws) {
     // Bank code holder
     let bankCode;
@@ -237,18 +235,19 @@ wss.on('connection', function (ws) {
                 // When message for foreign bank send to gosbank
                 else {
                     // Check if connected to NOOB
-                    if (socket.connected) {
+                    if (noob.connected) {
                         // When balance message
                         if (type === 'balance') {
                             // Send to NOOB and send the response back
                             console.log('Sending to NOOB...');
-                            socket.emit('balance', {
+                            noob.emit('balance', {
                                 header: data.header,
                                 body: {
                                     account: String(parseAccountParts(data.body.account).account).padStart(8, '0'),
                                     pin: data.body.pin
                                 }
-                            }, function (response) {
+                            });
+                            noob.once('response', function (response) {
                                 console.log('Response from NOOB: ' + JSON.stringify(response.body));
                                 responseMessage(id, 'balance', reponse);
                             });
@@ -258,7 +257,7 @@ wss.on('connection', function (ws) {
                         if (type === 'balance_response') {
                             data.body.message = codeMessages[data.body.code];
                             console.log('Sending to NOOB...');
-                            socket.emit('balance', data);
+                            noob.emit('response', data);
                         }
 
                         // When payment message
@@ -267,14 +266,15 @@ wss.on('connection', function (ws) {
                             if (parseAccountParts(data.body.toAccount) === 1) {
                                 // Send to NOOB and send the response back
                                 console.log('Sending to NOOB...');
-                                socket.emit('withdraw', {
+                                noob.emit('withdraw', {
                                     header: data.header,
                                     body: {
                                         account: String(parseAccountParts(data.body.fromAccount).account).padStart(8, '0'),
                                         pin: data.body.pin,
                                         amount: data.body.amount
                                     }
-                                }, function (response) {
+                                });
+                                noob.once('response', function (response) {
                                     console.log('Response from NOOB: ' + JSON.stringify(response.body));
                                     responseMessage(id, 'payment', reponse);
                                 });
@@ -300,7 +300,7 @@ wss.on('connection', function (ws) {
                         if (type === 'payment_response') {
                             data.body.message = codeMessages[data.body.code];
                             console.log('Sending to NOOB...');
-                            socket.emit('withdraw', data);
+                            noob.emit('response', data);
                         }
                     }
 
