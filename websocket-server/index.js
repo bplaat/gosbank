@@ -74,11 +74,17 @@ socket.on('balance', function (data) {
 
         console.log('Sending to ' + data.header.receiveBank + ' client...');
 
-        connectedBanks[data.header.receiveBank].send({
+        connectedBanks[data.header.receiveBank].send(JSON.stringify({
             id: Date.now(),
             type: 'balance',
-            data: data
-        });
+            data: {
+                header: data.header,
+                body: {
+                    account: data.header.receiveCountry + '-' + data.header.receiveBank + '-' + String(parseInt(data.body.account)).padStart(8, '0'),
+                    pin: data.body.pin
+                }
+            }
+        }));
     }
 });
 
@@ -94,19 +100,19 @@ socket.on('withdraw', function (data) {
 
         console.log('Sending to ' + data.header.receiveBank + ' client...');
 
-        connectedBanks[data.header.receiveBank].send({
+        connectedBanks[data.header.receiveBank].send(JSON.stringify({
             id: Date.now(),
             type: 'payment',
             data: {
                 header: data.header,
                 body: {
-                    fromAccount: data.header.originCountry + '-' + data.header.originBank + '-' + parseInt(data.body.account).padStart(8, '0'),
-                    toAccount: data.header.receiveCountry + '-' + data.header.receiveBank + '-00000001',
+                    fromAccount: data.header.receiveCountry + '-' + data.header.receiveBank + '-' + String(parseInt(data.body.account)).padStart(8, '0'),
+                    toAccount: data.header.originCountry + '-' + data.header.originBank + '-00000001',
                     pin: data.body.pin,
                     amount: data.body.amount
                 }
             }
-        });
+        }));
     }
 });
 
@@ -130,7 +136,7 @@ wss.on('connection', function (ws) {
     function responseMessage(id, type, data) {
         if (ws.readyState === WebSocket.OPEN) {
             console.log(data.header.originCountry + '-' + data.header.originBank + ' -> ' +
-                    data.header.receiveCountry + '-' + data.header.receiveBank + ': ' + type + ' ' + JSON.stringify(data.body));
+                    data.header.receiveCountry + '-' + data.header.receiveBank + ': ' + type + '_response ' + JSON.stringify(data.body));
 
             console.log('Sending to ' + data.header.receiveBank + ' client...');
 
@@ -236,7 +242,13 @@ wss.on('connection', function (ws) {
                         if (type === 'balance') {
                             // Send to NOOB and send the response back
                             console.log('Sending to NOOB...');
-                            socket.emit('balance', data, function (response) {
+                            socket.emit('balance', {
+                                header: data.header,
+                                body: {
+                                    account: String(parseAccountParts(data.body.account).account).padStart(8, '0'),
+                                    pin: data.body.pin
+                                }
+                            }, function (response) {
                                 console.log('Response from NOOB: ' + JSON.stringify(response.body));
                                 responseMessage(id, 'balance', reponse);
                             });
@@ -258,7 +270,7 @@ wss.on('connection', function (ws) {
                                 socket.emit('withdraw', {
                                     header: data.header,
                                     body: {
-                                        account: parseAccountParts(data.body.fromAccount).account.padStart(8, '0'),
+                                        account: String(parseAccountParts(data.body.fromAccount).account).padStart(8, '0'),
                                         pin: data.body.pin,
                                         amount: data.body.amount
                                     }
@@ -288,7 +300,7 @@ wss.on('connection', function (ws) {
                         if (type === 'payment_response') {
                             data.body.message = codeMessages[data.body.code];
                             console.log('Sending to NOOB...');
-                            socket.emit('payment', data);
+                            socket.emit('withdraw', data);
                         }
                     }
 
@@ -313,7 +325,7 @@ wss.on('connection', function (ws) {
         // When a error is thrown
         catch (exception) {
             // Log the exception
-            console.log('Error with ' + data.header.originBank + ' client:', exception);
+            console.log('Error with client', exception);
 
             // Send broken message back
             responseMessage(id, type, {
