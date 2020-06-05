@@ -122,7 +122,9 @@ noob.on('error', function (error) {
 // NOOB disconnect handler
 noob.on('disconnect', function () {
     console.log('Disconnected from NOOB, try to reconnect in ' + (RECONNECT_TIMEOUT / 1000).toFixed(0) + ' seconds!');
-    setTimeout(noob.open, RECONNECT_TIMEOUT);
+    setTimeout(function () {
+        noob.open();
+    }, RECONNECT_TIMEOUT);
 });
 
 // On client connection listener
@@ -248,13 +250,18 @@ wss.on('connection', function (ws) {
                                 }
                             });
                             noob.once('response', function (response) {
-                                console.log('Response from NOOB: ' + JSON.stringify(response.body));
-                                responseMessage(id, 'balance', reponse);
+                                if (response.header.action === 'balance') {
+                                    console.log('Response from NOOB: ' + JSON.stringify(response.body));
+                                    responseMessage(id, 'balance', response);
+                                } else {
+                                    console.log('NOOB response action is not balance');
+                                }
                             });
                         }
 
                         // When balance response message
                         if (type === 'balance_response') {
+                            data.header.action = 'balance';
                             data.body.message = codeMessages[data.body.code];
                             console.log('Sending to NOOB...');
                             noob.emit('response', data);
@@ -263,7 +270,7 @@ wss.on('connection', function (ws) {
                         // When payment message
                         if (type === 'payment') {
                             // Check to account is 1
-                            if (parseAccountParts(data.body.toAccount) === 1) {
+                            if (parseAccountParts(data.body.toAccount).account === 1) {
                                 // Send to NOOB and send the response back
                                 console.log('Sending to NOOB...');
                                 noob.emit('withdraw', {
@@ -275,8 +282,12 @@ wss.on('connection', function (ws) {
                                     }
                                 });
                                 noob.once('response', function (response) {
-                                    console.log('Response from NOOB: ' + JSON.stringify(response.body));
-                                    responseMessage(id, 'payment', reponse);
+                                    if (response.header.action === 'withdraw') {
+                                        console.log('Response from NOOB: ' + JSON.stringify(response.body));
+                                        responseMessage(id, 'payment', response);
+                                    } else {
+                                        console.log('NOOB response action is not withdraw');
+                                    }
                                 });
                             }
 
@@ -298,6 +309,7 @@ wss.on('connection', function (ws) {
 
                         // When payment response message
                         if (type === 'payment_response') {
+                            data.header.action = 'withdraw';
                             data.body.message = codeMessages[data.body.code];
                             console.log('Sending to NOOB...');
                             noob.emit('response', data);
