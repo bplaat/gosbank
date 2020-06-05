@@ -252,6 +252,8 @@ wss.on('connection', function (ws) {
                             noob.once('response', function (response) {
                                 if (response.header.action === 'balance') {
                                     console.log('Response from NOOB: ' + JSON.stringify(response.body));
+                                    delete response.header.action;
+                                    delete response.body.message;
                                     responseMessage(id, 'balance', response);
                                 } else {
                                     console.log('NOOB response action is not balance');
@@ -284,6 +286,8 @@ wss.on('connection', function (ws) {
                                 noob.once('response', function (response) {
                                     if (response.header.action === 'withdraw') {
                                         console.log('Response from NOOB: ' + JSON.stringify(response.body));
+                                        delete response.header.action;
+                                        delete response.body.message;
                                         responseMessage(id, 'payment', response);
                                     } else {
                                         console.log('NOOB response action is not withdraw');
@@ -353,6 +357,9 @@ wss.on('connection', function (ws) {
             });
 
             // Close connection
+            if (bankCode != undefined) {
+                connectedBanks[bankCode] = undefined;
+            }
             ws.close();
         }
     });
